@@ -11,6 +11,41 @@ import acvm from "@noir-lang/acvm_js/web/acvm_js_bg.wasm?url";
 import noirc from "@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm?url";
 await Promise.all([initACVM(fetch(acvm)), initNoirC(fetch(noirc))]);
 
+import { connect, disconnect } from "starknetkit";
+
+const connectWallet = async () => {
+    try {
+        const { wallet, connectorData } = await connect({
+            modalMode: "alwaysAsk",
+            modalTheme: "light",
+            webWalletUrl: "https://web.argent.xyz",
+            argentMobileOptions: {
+                dappName: "My Noir Dapp",
+                projectId: "YOUR_PROJECT_ID", // Wpisz swój WalletConnect Project ID
+                chainId: "SN_MAIN", // lub "SN_GOERLI" dla testnetu
+                url: window.location.hostname,
+                icons: ["https://your-icon-url.com"],
+                rpcUrl: "YOUR_RPC_URL",
+            },
+        });
+
+        if (wallet && connectorData) {
+            console.log("Połączono z:", connectorData.account);
+            document.getElementById("wallet-address").textContent = `Adres: ${connectorData.account}`;
+        } else {
+            console.log("Nie udało się połączyć z Argent Wallet");
+        }
+    } catch (error) {
+        console.error("Błąd podczas łączenia z Argent Wallet:", error);
+    }
+};
+
+const disconnectWallet = async () => {
+    await disconnect();
+    console.log("Portfel odłączony");
+    document.getElementById("wallet-address").textContent = "Adres: brak";
+};
+
 export async function getCircuit() {
     const fm = createFileManager("/");
     const { body } = await fetch(main);
@@ -44,3 +79,6 @@ document.getElementById("submit").addEventListener("click", async () => {
         show("logs", "Oh 💔");
     }
 });
+
+document.getElementById("connect-wallet").addEventListener("click", connectWallet);
+document.getElementById("disconnect-wallet").addEventListener("click", disconnectWallet);
