@@ -75,6 +75,9 @@ document.getElementById("submit").addEventListener("click", async () => {
         const proof = await backend.generateProof(witness);
         show("logs", "Generated proof... ✅");
         show("results", proof.proof);
+        show('logs', 'Verifying proof... ⌛');
+        const isValid = await backend.verifyProof(proof);
+        show("logs", `Proof is ${isValid ? "valid" : "invalid"}... ✅`);
     } catch {
         show("logs", "Oh 💔");
     }
